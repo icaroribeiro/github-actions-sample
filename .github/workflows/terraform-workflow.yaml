@@ -1,0 +1,163 @@
+name: "terraform-workflow"
+
+on:
+  workflow_call:
+    inputs:
+      terraform_version:
+        type: string
+        required: true
+      destroy:
+        type: string
+        required: true
+      environment:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+      aws-region:
+        type: string
+        required: true
+      aws-assume-role-arn:
+        type: string
+        required: true
+      aws-state-file-s3-bucket:
+        type: string
+        required: true
+      aws-state-lock-dynamodb-table:
+        type: string
+        required: true
+
+jobs:
+  terraform-workflow:
+    name: "Terraform Workflow"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # - name: Set up Terraform
+      #   uses: hashicorp/setup-terraform@v3
+      #   with:
+      #     terraform_version: ${{ inputs.terraform_version }}
+
+      # - name: Terraform fmt
+      #   id: fmt
+      #   run: terraform fmt -check
+      #   continue-on-error: true
+
+      # - name: Download all artifacts
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     path: ./lambdas/artifacts
+      #     pattern: "*-artifact"
+
+      # - name: Display structure of downloaded artifacts
+      #   run: ls -R ./lambdas/artifacts
+      #   continue-on-error: true
+
+      # - name: Extract branch name
+      #   id: extract_branch
+      #   shell: bash
+      #   run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+
+      - name: Display variables
+        run: |
+          echo "destroy: ${{ inputs.destroy }}"
+          echo "environment: ${{ inputs.environment }}"
+          echo "branch: ${{ inputs.branch }}"
+          echo "aws-region: ${{ inputs.aws-region }}"
+          echo "aws-assume-role-arn: ${{ inputs.aws-assume-role-arn }}"
+          echo "aws-state-file-s3-bucket: ${{ inputs.aws-state-file-s3-bucket }}"
+          echo "aws-state-lock-dynamodb-table: ${{ inputs.aws-state-lock-dynamodb-table }}"
+
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: ${{ inputs.aws-assume-role-arn }}
+      #     role-session-name: GitHub_to_AWS_via_FederatedIODC
+      #     aws-region: ${{ inputs.aws-region }}
+
+      # - name: Read destroy configuration
+      #   id: read-destroy-config
+      #   run: |
+      #     # DESTROY='$(jq -r "${{ steps.extract_branch.outputs.branch }}" ./destroy_config.json)'
+      #     DESTROY="${{fromJson(steps.set_var.outputs.packageJson).version}}"
+      #     echo "$DESTROY"
+      #     echo "destroy=$(echo $DESTROY)" >> $GITHUB_OUTPUT
+      #   continue-on-error: true
+
+      # - name: Check condition 1
+      #   if: steps.read-destroy-config.outputs.destroy == 'true'
+      #   id: check-condition-1
+      #   run: |
+      #     echo "Condition 1 satisfied"
+
+      # - name: Check condition 2
+      #   if: steps.read-destroy-config.outputs.destroy != 'true'
+      #   id: check-condition-2
+      #   run: |
+      #     echo "Condition 2 satisfied"
+
+      # - name: Terraform init
+      #   run: |
+      #     terraform init \
+      #       -backend-config="bucket=${{ inputs.aws-state-file-s3-bucket }}" \
+      #       -backend-config="key=${{ github.event.repository.name }}" \
+      #       -backend-config="region=${{ inputs.aws-region }}" \
+      #       -backend-config="dynamodb_table=${{ inputs.aws-state-lock-dynamodb-table }}"
+
+      # - name: Terraform Validate
+      #   run: terraform validate
+
+      # - name: Terraform Plan
+      #   if: steps.read-destroy-config.outputs.destroy != 'true'
+      #   id: terraform-plan
+      #   run: |
+      #     terraform workspace select ${{ inputs.environment }} -or-create &&
+      #     terraform plan \
+      #       -var="branch=${{ steps.extract_branch.outputs.branch }}" \
+      #       -var-file="./envs/${{ inputs.environment }}.tfvars" \
+      #       -out="${{ inputs.environment }}.plan"
+
+      # - name: Terraform Plan with Destroy mode
+      #   if: steps.read-destroy-config.outputs.destroy == 'true'
+      #   id: terraform-plan-destroy-mode
+      #   run: |
+      #     terraform workspace select ${{ inputs.environment }} -or-create &&
+      #     terraform plan \
+      #       -var="branch=${{ steps.extract_branch.outputs.branch }}" \
+      #       -var-file="./envs/${{ inputs.environment }}.tfvars" \
+      #       -destroy
+      #       -out="${{ inputs.environment }}.destrplan"
+
+      # - name: Wait for deployment approval
+      #   uses: trstringer/manual-approval@v1
+      #   with:
+      #     secret: ${{ github.TOKEN }}
+      #     approvers: icaroribeiro
+      #     minimum-approvals: 1
+      #     issue-title: "Deploying to ${{ inputs.environment }} environment"
+      #     issue-body: "Please approve or deny the deployment!"
+      #     exclude-workflow-initiator-as-approver: false
+      #     additional-approved-words: ""
+      #     additional-denied-words: ""
+      #   timeout-minutes: 60
+
+      # - name: Terraform Apply
+      #   if: steps.read-destroy-config.outputs.destroy != 'true'
+      #   id: terraform-apply
+      #   run: |
+      #     terraform workspace select ${{ inputs.environment }} -or-create &&
+      #     terraform apply "${{ inputs.environment }}.plan -auto-approve"
+
+      # - name: Terraform Destroy
+      #   if: steps.read-destroy-config.outputs.destroy == 'true'
+      #   id: terraform-destroy
+      #   run: |
+      #     terraform workspace select ${{ inputs.environment }} -or-create &&
+      #     terraform destroy "${{ inputs.environment }}.destrplan -auto-approve"
