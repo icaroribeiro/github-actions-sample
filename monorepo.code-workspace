@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"path": "./.github",
+			"name": "github"
+		},
+		{
+			"path": "./lambdas/lambda-1",
+			"name": "lambda-1"
+		},
+		{
+			"path": "./infra",
+			"name": "infra"
+		},
+		{
+			"path": ".",
+			"name": "ROOT"
+		}
+	],
+	"settings": {}
+}

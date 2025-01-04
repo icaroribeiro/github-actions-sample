@@ -1,0 +1,114 @@
+name: "apply-infra-workflow"
+
+on:
+  workflow_call:
+    inputs:
+      terraform_version:
+        type: string
+        required: true
+      environment:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+      aws-region:
+        type: string
+        required: true
+      aws-assume-role-arn:
+        type: string
+        required: true
+      aws-state-file-s3-bucket:
+        type: string
+        required: true
+      aws-state-lock-dynamodb-table:
+        type: string
+        required: true
+
+jobs:
+  apply-infra-workflow:
+    name: "Apply Infra workflow"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./lambdas/artifacts
+          pattern: "lambda-*-artifact"
+
+      - name: Display downloaded artifact structure
+        run: ls -R ./../lambdas/artifacts
+
+      - name: Display variables
+        run: |
+          echo "terraform_version: ${{ inputs.terraform_version }}"
+          echo "environment: ${{ inputs.environment }}"
+          echo "branch: ${{ inputs.branch }}"
+          echo "aws-region: ${{ inputs.aws-region }}"
+          echo "aws-assume-role-arn: ${{ inputs.aws-assume-role-arn }}"
+          echo "aws-state-file-s3-bucket: ${{ inputs.aws-state-file-s3-bucket }}"
+          echo "aws-state-lock-dynamodb-table: ${{ inputs.aws-state-lock-dynamodb-table }}"
+
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: ${{ inputs.aws-assume-role-arn }}
+      #     role-session-name: GitHub_to_AWS_via_FederatedIODC
+      #     aws-region: ${{ inputs.aws-region }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ inputs.terraform_version }}
+
+      - name: Terraform fmt
+        id: terraform-fmt
+        run: terraform fmt -check
+
+    # - name: Terraform init
+    #   id: terraform-init
+    #   run: |
+    #     terraform init \
+    #       -backend-config="bucket=${{ inputs.aws-state-file-s3-bucket }}" \
+    #       -backend-config="key=${{ github.event.repository.name }}" \
+    #       -backend-config="region=${{ inputs.aws-region }}" \
+    #       -backend-config="dynamodb_table=${{ inputs.aws-state-lock-dynamodb-table }}"
+
+    # - name: Terraform validate
+    #   id: terraform-validate
+    #   run: terraform validate
+
+    # - name: Terraform plan
+    #   id: terraform-plan
+    #   run: |
+    #     terraform workspace select ${{ inputs.environment }} -or-create &&
+    #     terraform plan \
+    #       -var="branch=${{ inputs.branch }}" \
+    #       -var-file="./envs/${{ inputs.environment }}.tfvars" \
+    #       -out="${{ inputs.environment }}.plan"
+
+    # - name: Wait for deployment approval
+    #   uses: trstringer/manual-approval@v1
+    #   with:
+    #     secret: ${{ github.TOKEN }}
+    #     approvers: icaroribeiro
+    #     minimum-approvals: 1
+    #     issue-title: "Deploying to ${{ inputs.environment }} environment"
+    #     issue-body: "Please approve or deny the deployment!"
+    #     exclude-workflow-initiator-as-approver: false
+    #     additional-approved-words: ""
+    #     additional-denied-words: ""
+    #   timeout-minutes: 60
+
+    # - name: Terraform apply
+    #   id: terraform-apply
+    #   run: |
+    #     terraform workspace select ${{ inputs.environment }} -or-create &&
+    #     terraform apply "${{ inputs.environment }}.plan -auto-approve"
