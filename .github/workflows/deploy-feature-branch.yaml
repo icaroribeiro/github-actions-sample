@@ -1,0 +1,33 @@
+name: "deploy-feature-branch"
+
+on:
+  push:
+    branches:
+      - "np**"
+  pull_request:
+    branches:
+      - "np**"
+
+jobs:
+  build-lambda1:
+    name: "Build Lambda 1"
+    uses: ./.github/workflows/shared/python-workflow.yaml
+    with:
+      python-version: "3.12"
+      lambda: "lambda1"
+
+  deploy-infra:
+    name: "Deploy AWS resources"
+    permissions:
+      issues: write
+    uses: ./.github/workflows/shared/terraform-workflow.yaml
+    needs: [build-lambda1]
+    with:
+      terraform_version: "1.8.3"
+      destroy: false
+      environment: "dev"
+      branch: ${{ github.head_ref || github.ref_name }}
+      aws-region: "sa-east-1"
+      aws-assume-role-arn: "aws-assume-role-arn"
+      aws-state-file-s3-bucket: "aws-state-file-s3-bucket"
+      aws-state-lock-dynamodb-table: "aws-state-lock-dynamodb-table"
