@@ -1,0 +1,20 @@
+name: "delete-feature-branch"
+
+on:
+  delete:
+
+jobs:
+  destroy-infra:
+    if: github.event.ref_type == 'branch'
+    name: "Destroy Infra from AWS"
+    permissions:
+      issues: write
+    uses: ./.github/workflows/destroy-infra-workflow.yaml
+    with:
+      terraform_version: "1.8.3"
+      environment: "dev"
+      branch: ${{ github.event.ref }}
+      aws-region: "sa-east-1"
+      aws-assume-role-arn: "aws-assume-role-arn"
+      aws-state-file-s3-bucket: "aws-state-file-s3-bucket"
+      aws-state-lock-dynamodb-table: "aws-state-lock-dynamodb-table"
