@@ -16,7 +16,7 @@ class TestLambda1Handler:
 
 class TestSayHello(TestLambda1Handler):
     def test_say_hello(self, lambda_handler: Lambda1Handler) -> None:
-        expected_result: str = "Hello World!"
+        expected_result: str = "Hello World 2!"
 
         result = lambda_handler.say_hello()
 
