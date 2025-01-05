@@ -1,4 +1,4 @@
-name: "terraform-workflow"
+name: "destroy-infra-workflow"
 
 on:
   workflow_call:
@@ -26,8 +26,8 @@ on:
         required: true
 
 jobs:
-  terraform-workflow:
-    name: "Terraform Workflow"
+  destroy-infra-workflow:
+    name: "Destroy Infra workflow"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -59,7 +59,7 @@ jobs:
         with:
           terraform_version: ${{ inputs.terraform_version }}
 
-      - name: Terraform FMT
+      - name: Terraform fmt
         id: terraform-fmt
         run: terraform fmt -check
         continue-on-error: false
