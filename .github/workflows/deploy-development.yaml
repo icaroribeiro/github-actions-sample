@@ -4,10 +4,13 @@ on:
   pull_request:
     branches:
       - dev
+    types:
+      - closed
 
 jobs:
   build-lambda-1:
     name: "Build Lambda 1"
+    if: github.event.pull_request.merged == true
     uses: ./.github/workflows/python-workflow.yaml
     with:
       python-version: "3.12"
@@ -15,6 +18,7 @@ jobs:
 
   deploy-infra:
     name: "Deploy Infra to AWS"
+    if: github.event.pull_request.merged == true
     permissions:
       issues: write
     uses: ./.github/workflows/apply-infra-workflow.yaml
