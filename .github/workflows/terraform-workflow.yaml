@@ -67,6 +67,7 @@ jobs:
 
       - name: Display variables
         run: |
+          echo "deploy: ${{ inputs.deploy }}"
           echo "destroy: ${{ inputs.destroy }}"
           echo "environment: ${{ inputs.environment }}"
           echo "branch: ${{ inputs.branch }}"
