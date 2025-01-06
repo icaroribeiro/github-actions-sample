@@ -2,30 +2,46 @@ name: "python-workflow"
 
 on:
   workflow_call:
-    inputs:
-      python-version:
-        type: string
-        required: true
-      lambda:
-        type: string
-        required: true
 
 jobs:
-  python-workflow:
-    name: Python workflow
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./lambdas/${{ inputs.lambda }}
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Read lambdas configuration
+        id: set-matrix
+        run: |
+          LAMBDAS_CONFIG="$(jq -c . < ./lambdas-config.json)"
+          echo "lambdas-config=$(echo $LAMBDAS_CONFIG)" >> $GITHUB_OUTPUT
+      
+    outputs:
+        matrix: ${{ steps.set-matrix.outputs.lambdas-config }}
+
+  build:
+    name: Build
+    needs: [setup]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lambda-config-obj: ${{ fromJson(needs.setup.outputs.matrix) }}
+  
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Display lambda configuration
+        run: |
+          echo "pythonVersion: ${{ matrix.lambda-config-obj.pythonVersion }}"
+          echo "lambdaName: ${{ matrix.lambda-config-obj.lambdaName }}"
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ inputs.python-version }}
+          python-version: ${{ matrix.lambda-config-obj.pythonVersion }}
 
       - name: Install poetry
         uses: abatilo/actions-poetry@v2
@@ -33,23 +49,27 @@ jobs:
       - name: Define virtual environment cache
         uses: actions/cache@v3
         with:
-          path: ./lambdas/${{ inputs.lambda }}/.venv
-          key: venv-${{ hashFiles(format('./lambdas/{0}/poetry.lock', inputs.lambda)) }}
+          path: ./lambdas/${{ matrix.lambda-config-obj.lambdaName }}/.venv
+          key: venv-${{ hashFiles(format('./lambdas/{0}/poetry.lock', matrix.lambda-config-obj.lambdaName)) }}
 
       - name: Install dependencies
+        working-directory: ./lambdas/${{ matrix.lambda-config-obj.lambdaName }}
         run: poetry install
 
       - name: Lint source code
+        working-directory: ./lambdas/${{ matrix.lambda-config-obj.lambdaName }}
         run: poetry run poe lint
 
       - name: Test source code
+        working-directory: ./lambdas/${{ matrix.lambda-config-obj.lambdaName }}
         run: poetry run poe test
 
       - name: Build source code
+        working-directory: ./lambdas/${{ matrix.lambda-config-obj.lambdaName }}
         run: poetry run poe build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.lambda }}-artifact
-          path: ./lambdas/${{ inputs.lambda }}/bundle
+          name: ${{ matrix.lambda-config-obj.lambdaName }}-artifact
+          path: ./lambdas/${{ matrix.lambda-config-obj.lambdaName }}/bundle
