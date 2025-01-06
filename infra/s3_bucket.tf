@@ -1,9 +1,9 @@
-resource "aws_s3_bucket" "state_file_s3_bucket_access_logs" {
-  bucket = var.state_file_s3_bucket_logs
+resource "aws_s3_bucket" "aws_state_file_s3_bucket_access_logs" {
+  bucket = var.aws_state_file_s3_bucket_logs
 }
 
 resource "aws_S3_bucket_server_side_encryption_configuration" "state_file_s3_bucket_access_logs_encryption_configuration" {
-  bucket = aws_s3_bucket.state_file_s3_bucket_access_logs.id
+  bucket = aws_s3_bucket.aws_state_file_s3_bucket_access_logs.id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -14,8 +14,8 @@ resource "aws_S3_bucket_server_side_encryption_configuration" "state_file_s3_buc
   }
 }
 
-resource "aws_S3_bucket_lifecycle_configuration" "state_file_s3_bucket_access_logs_lifecycle_configuration" {
-  bucket = aws_s3_bucket.state_file_s3_bucket_access_logs.id
+resource "aws_S3_bucket_lifecycle_configuration" "aws_state_file_s3_bucket_access_logs_lifecycle_configuration" {
+  bucket = aws_s3_bucket.aws_state_file_s3_bucket_access_logs.id
 
   rule {
     id     = "storage-class-transitions"
@@ -34,14 +34,14 @@ resource "aws_S3_bucket_lifecycle_configuration" "state_file_s3_bucket_access_lo
   }
 }
 
-resource "aws_s3_bucket" "sate_file_s3_bucket" {
-  bucket              = var.state_file_s3_bucket
+resource "aws_s3_bucket" "aws_state_file_s3_bucket" {
+  bucket              = var.aws_state_file_s3_bucket
   force_destroy       = false
   object_lock_enabled = false
 }
 
-resource "aws_S3_bucket_server_side_encryption_configuration" "state_file_s3_bucket_encryption_configuration" {
-  bucket = aws_s3_bucket.sate_file_s3_bucket.id
+resource "aws_S3_bucket_server_side_encryption_configuration" "aws_state_file_s3_bucket_encryption_configuration" {
+  bucket = aws_s3_bucket.aws_state_file_s3_bucket.id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -52,9 +52,9 @@ resource "aws_S3_bucket_server_side_encryption_configuration" "state_file_s3_buc
   }
 }
 
-resource "aws_s3_bucket_logging" "state_file_s3_bucket_logging" {
-  depends_on    = [aws_s3_bucket.state_file_s3_bucket, aws_s3_bucket.state_file_s3_bucket_access_logs]
-  bucket        = aws_s3_bucket.sate_file_s3_bucket.id
-  target_bucket = aws_s3_bucket.state_file_s3_bucket_access_logs.id
-  target_prefix = "${aws_s3_bucket.state_file_s3_bucket.id}-logs/"
+resource "aws_s3_bucket_logging" "aws_state_file_s3_bucket_logging" {
+  depends_on    = [aws_s3_bucket.aws_state_file_s3_bucket, aws_s3_bucket.aws_state_file_s3_bucket_access_logs]
+  bucket        = aws_s3_bucket.aws_state_file_s3_bucket.id
+  target_bucket = aws_s3_bucket.aws_state_file_s3_bucket_access_logs.id
+  target_prefix = "${aws_s3_bucket.aws_state_file_s3_bucket.id}-logs/"
 }

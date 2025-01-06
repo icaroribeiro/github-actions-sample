@@ -1,0 +1,75 @@
+name: "python_workflow"
+
+on:
+  workflow_call:
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read lambdas configuration
+        id: set-matrix
+        run: |
+          LAMBDAS_CONFIG="$(jq -c . < ./lambdas_config.json)"
+          echo "lambdas_config=$(echo $LAMBDAS_CONFIG)" >> $GITHUB_OUTPUT
+      
+    outputs:
+        matrix: ${{ steps.set-matrix.outputs.lambdas_config }}
+
+  build:
+    name: Build
+    needs: [setup]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lambda_config_obj: ${{ fromJson(needs.setup.outputs.matrix) }}
+  
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Display lambda configuration
+        run: |
+          echo "pythonVersion: ${{ matrix.lambda_config_obj.pythonVersion }}"
+          echo "lambdaName: ${{ matrix.lambda_config_obj.lambdaName }}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.lambda_config_obj.pythonVersion }}
+
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v2
+
+      - name: Define virtual environment cache
+        uses: actions/cache@v3
+        with:
+          path: ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}/.venv
+          key: venv-${{ hashFiles(format('./lambdas/{0}/poetry.lock', matrix.lambda_config_obj.lambdaName)) }}
+
+      - name: Install dependencies
+        working-directory: ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}
+        run: poetry install
+
+      - name: Lint source code
+        working-directory: ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}
+        run: poetry run poe lint
+
+      - name: Test source code
+        working-directory: ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}
+        run: poetry run poe test
+
+      - name: Build source code
+        working-directory: ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}
+        run: poetry run poe build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.lambda_config_obj.lambdaName }}_artifact
+          path: ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}/bundle
