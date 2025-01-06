@@ -5,8 +5,12 @@
 			"name": "github"
 		},
 		{
-			"path": "./lambdas/lambda-1",
-			"name": "lambda-1"
+			"path": "./lambdas/lambda_1",
+			"name": "lambda_1"
+		},
+		{
+			"path": "./lambdas/lambda_2",
+			"name": "lambda_2"
 		},
 		{
 			"path": "./infra",

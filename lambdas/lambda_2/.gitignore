@@ -1,0 +1,6 @@
+.pytest_cache
+.ruff_cache
+bundle
+coverage.xml
+.venv
+requirements.txt
