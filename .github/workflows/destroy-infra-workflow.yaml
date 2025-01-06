@@ -37,15 +37,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Display variables
+      # - name: Display variables
+      #   run: |
+      #     echo "terraform_version: ${{ inputs.terraform_version }}"
+      #     echo "environment: ${{ inputs.environment }}"
+      #     echo "branch: ${{ inputs.branch }}"
+      #     echo "aws-region: ${{ inputs.aws-region }}"
+      #     echo "aws-assume-role-arn: ${{ inputs.aws-assume-role-arn }}"
+      #     echo "aws-state-file-s3-bucket: ${{ inputs.aws-state-file-s3-bucket }}"
+      #     echo "aws-state-lock-dynamodb-table: ${{ inputs.aws-state-lock-dynamodb-table }}"
+
+      - name: Destroy resources
         run: |
-          echo "terraform_version: ${{ inputs.terraform_version }}"
-          echo "environment: ${{ inputs.environment }}"
-          echo "branch: ${{ inputs.branch }}"
-          echo "aws-region: ${{ inputs.aws-region }}"
-          echo "aws-assume-role-arn: ${{ inputs.aws-assume-role-arn }}"
-          echo "aws-state-file-s3-bucket: ${{ inputs.aws-state-file-s3-bucket }}"
-          echo "aws-state-lock-dynamodb-table: ${{ inputs.aws-state-lock-dynamodb-table }}"
+          echo "Destroy resources for branch ${{ inputs.branch }}"
 
       # - name: Configure AWS credentials
       #   uses: aws-actions/configure-aws-credentials@v4

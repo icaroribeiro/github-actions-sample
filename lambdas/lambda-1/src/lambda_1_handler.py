@@ -6,4 +6,4 @@ class Lambda1Handler:
         self.__config = config
 
     def say_hello(self) -> str:
-        return "Hello World!"
+        return "Hello World 3!"
