@@ -1,14 +1,14 @@
-variable "state_file_s3_bucket" {
+variable "aws_state_file_s3_bucket" {
   type        = string
   description = "The name of s3 bucket where Terraform state files are stored"
 }
 
-variable "state_lock_dynamodb_table" {
+variable "aws_state_lock_dynamodb_table" {
   type        = string
   description = "The name of DynamoDB table where Terraform state locks are stored"
 }
 
-variable "region" {
+variable "aws_region" {
   type        = string
   description = "The AWS region where AWS services are hosted"
 }
