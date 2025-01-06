@@ -1,3 +1,5 @@
 state_file_s3_bucket = "state-file-s3-bucket-prd"
+state_file_s3_bucket_logs = "state-file-s3-bucket-logs-prd"
+state_lock_dynamodb_table = "state-lock-dynamodb-table-prd"
 region = "sa-east-1"
 environment = "prd"

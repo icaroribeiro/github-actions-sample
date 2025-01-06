@@ -9,6 +9,10 @@
 			"name": "lambda-1"
 		},
 		{
+			"path": "./lambdas/lambda-2",
+			"name": "lambda-2"
+		},
+		{
 			"path": "./infra",
 			"name": "infra"
 		},
