@@ -9,19 +9,16 @@ on:
       - "np**"
 
 jobs:
-  build-lambda-1:
-    name: "Build Lambda 1"
+  build-lambdas:
+    name: "Build Lambdas"
     uses: ./.github/workflows/python-workflow.yaml
-    with:
-      python-version: "3.12"
-      lambda: "lambda-1"
 
   deploy-infra:
     name: "Deploy Infra to AWS"
     permissions:
       issues: write
     uses: ./.github/workflows/apply-infra-workflow.yaml
-    needs: [build-lambda-1]
+    needs: [build-lambdas]
     with:
       terraform_version: "1.8.3"
       environment: "dev"
