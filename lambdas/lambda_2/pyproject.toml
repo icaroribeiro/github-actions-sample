@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "lambda-2"
+name = "lambda_2"
 version = "0.1.0"
 description = ""
 authors = ["icaroribeiro <icaroribeiro@hotmail.com>"]

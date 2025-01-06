@@ -1,4 +1,4 @@
-name: "deploy-development"
+name: "deploy_development"
 
 on:
   pull_request:
@@ -10,20 +10,20 @@ on:
 jobs:
   build-lambdas:
     name: "Build Lambdas"
-    uses: ./.github/workflows/python-workflow.yaml
+    uses: ./.github/workflows/python_workflow.yaml
 
   deploy-infra:
     name: "Deploy Infra to AWS"
     if: github.event.pull_request.merged == true
     permissions:
       issues: write
-    uses: ./.github/workflows/apply-infra-workflow.yaml
+    uses: ./.github/workflows/apply_infra_workflow.yaml
     needs: [build-lambdas]
     with:
       terraform_version: "1.8.3"
       environment: "dev"
       branch: "dev"
-      aws-region: "sa-east-1"
-      aws-assume-role-arn: "aws-assume-role-arn"
-      aws-state-file-s3-bucket: "aws-state-file-s3-bucket"
-      aws-state-lock-dynamodb-table: "aws-state-lock-dynamodb-table"
+      aws_region: "sa-east-1"
+      aws_assume_role_arn: "aws_assume_role_arn"
+      aws_state_file_s3_bucket: "aws_state_file_s3_bucket"
+      aws_state_lock_dynamodb_table: "aws_state_lock_dynamodb_table"

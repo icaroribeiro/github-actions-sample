@@ -1,10 +1,10 @@
 [
 	{
 		"pythonVersion": "3.12",
-		"lambdaName": "lambda-1"
+		"lambdaName": "lambda_1"
 	},
 	{
 		"pythonVersion": "3.12",
-		"lambdaName": "lambda-2"
+		"lambdaName": "lambda_2"
 	}
 ]
