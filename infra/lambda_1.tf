@@ -1,7 +1,7 @@
 data "archive_file" "aws_lambda_1_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/../lambdas/artifacts/lambda_1_code_distribution_artifact"
-  output_path = "${path.module}/../lambdas/artifacts/lambda_1_code_distribution_artifact.zip"
+  source_dir  = "${path.module}/../lambdas/artifacts/lambda_1_code_dist_artifact"
+  output_path = "${path.module}/../lambdas/artifacts/lambda_1_code_dist_artifact.zip"
 }
 
 resource "aws_lambda_function" "aws_lambda_1" {

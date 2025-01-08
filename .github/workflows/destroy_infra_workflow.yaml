@@ -26,8 +26,8 @@ on:
         required: true
 
 jobs:
-  destroy_infra_workflow:
-    name: "Destroy Infra workflow"
+  destroy-infra-resources:
+    name: "Destroy Infra Resources"
     runs-on: ubuntu-latest
     defaults:
       run:

@@ -9,16 +9,25 @@ on:
       - "np**"
 
 jobs:
+  # test-display:
+  #   name: "Test Display"
+  #   uses: ./.github/workflows/test_display_workflow.yaml
+
   build-lambdas:
     name: "Build Lambdas"
-    uses: ./.github/workflows/python_workflow.yaml
+    uses: ./.github/workflows/run_python_workflow.yaml
+
+  analyze-code:
+    name: "Analyze Code"
+    uses: ./.github/workflows/inspect_code_quality_workflow.yaml
+    needs: [build-lambdas]
 
   deploy-infra:
-    name: "Deploy Infra to AWS"
+    name: "Deploy Infra"
     permissions:
       issues: write
     uses: ./.github/workflows/apply_infra_workflow.yaml
-    needs: [build-lambdas]
+    needs: [build-lambdas, analyze-code]
     with:
       terraform_version: "1.8.3"
       environment: "dev"

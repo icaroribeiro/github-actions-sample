@@ -4,9 +4,9 @@ on:
   delete:
 
 jobs:
-  destroy_infra:
+  delete-infra:
     if: github.event.ref_type == 'branch'
-    name: "Destroy Infra from AWS"
+    name: "Delete Infra"
     permissions:
       issues: write
     uses: ./.github/workflows/destroy_infra_workflow.yaml

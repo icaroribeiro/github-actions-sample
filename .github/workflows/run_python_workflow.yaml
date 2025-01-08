@@ -1,11 +1,11 @@
-name: "python_workflow"
+name: "run_python_workflow"
 
 on:
   workflow_call:
 
 jobs:
   setup:
-    name: Setup
+    name: "Setup"
     runs-on: ubuntu-latest
 
     steps:
@@ -15,14 +15,14 @@ jobs:
       - name: Read lambdas configuration
         id: set-matrix
         run: |
-          LAMBDAS_CONFIG="$(jq -c . < ./lambdas_config.json)"
-          echo "lambdas_config=$(echo $LAMBDAS_CONFIG)" >> $GITHUB_OUTPUT
+          LAMBDA_CONFIG="$(jq -c . lambda_config.json)"
+          echo "lambda_config=$(echo $LAMBDA_CONFIG)" >> $GITHUB_OUTPUT
 
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.lambdas_config }}
+      matrix: ${{ steps.set-matrix.outputs.lambda_config }}
 
-  build:
-    name: Build
+  list-test-build:
+    name: "Lint, Test and Build"
     needs: [setup]
     runs-on: ubuntu-latest
     strategy:
@@ -56,29 +56,27 @@ jobs:
         working-directory: ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}
         run: poetry install
 
-      - name: Lint source code
+      - name: Lint code
         working-directory: ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}
         run: poetry run poe lint
 
-      - name: Test source code
+      - name: Test code
         working-directory: ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}
         run: poetry run poe test
 
-      - name: Build source code
+      - name: Upload artifact to inspect the code quality
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.lambda_config_obj.lambdaName }}_cov_artifact
+          path: |
+            ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}/coverage.xml
+
+      - name: Build code
         working-directory: ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}
         run: poetry run poe build
 
-      - name: Upload code distribution artifact
+      - name: Upload artifact to distribute the code
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.lambda_config_obj.lambdaName }}_code_distribution_artifact
+          name: ${{ matrix.lambda_config_obj.lambdaName }}_release_artifact
           path: ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}/bundle
-
-      - name: Upload code quelity inspection artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.lambda_config_obj.lambdaName }}_code_quality_inspection_artifact
-          path: |
-            ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}/src/**
-            ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}/tests/**
-            ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}/coverage.xml

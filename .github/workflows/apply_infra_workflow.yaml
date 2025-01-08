@@ -26,8 +26,8 @@ on:
         required: true
 
 jobs:
-  apply_infra_workflow:
-    name: "Apply Infra workflow"
+  apply-infra-resources:
+    name: "Apply Infra Resources"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -37,30 +37,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download all code distribution artifacts
+      - name: Download all artifacts to distribute the code
         uses: actions/download-artifact@v4
         with:
-          path: ./lambdas/code_distribution_artifacts
-          pattern: "lambda_*_code_distribution_artifact"
+          path: ./lambdas/release_artifacts
+          pattern: "lambda_*_release_artifact"
 
-      - name: Display downloaded code distribution artifact structure
-        run: ls -R ./../lambdas/code_distribution_artifacts
-
-      - name: Download all code quality inspection artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./lambdas/code_quality_inspection_artifacts
-          pattern: "lambda_*_code_quality_inspection_artifact"
-
-      - name: Display downloaded code quality inspection artifact structure
-        run: ls -R ./../lambdas/code_quality_inspection_artifacts
-      
-      # extraProperties: |
-      # sonar.python.coverage.reportPaths = ./..lambdas/code_quality_inspection_artifacts/**/coverage.xml
-      # sonar.sources = ./..lambdas/code_quality_inspection_artifacts/
-      # sonar.tests = ./..lambdas/code_quality_inspection_artifacts/**tests/
-      # sonar.test.inclusions = **/test_*.py
-      # sonar.exclusions = ./..lambdas/code_quality_inspection_artifacts/**/src/index.py,./..lambdas/code_quality_inspection_artifacts/**/tests/**/*
+      - name: Display all downloaded artifacts structure to distribute the code
+        run: ls -R ./../lambdas/release_artifacts
 
       # - name: Display variables
       #   run: |

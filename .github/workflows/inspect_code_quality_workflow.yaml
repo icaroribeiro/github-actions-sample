@@ -1,0 +1,53 @@
+name: "inspect_code_quality_workflow"
+
+on:
+  workflow_call:
+
+jobs:
+  inspect-code-quality:
+    name: "Inspect Code Quality"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read lambda names
+        id: read-lambda-names
+        run: |
+          LAMBDA_NAMES="$(jq -r '.[].lambdaName' lambda_config.json)"
+          echo "lambda_names=$(echo $LAMBDA_NAMES)" >> $GITHUB_OUTPUT
+
+      - name: Display lambda names
+        run: |
+          items=$(echo  ${{ steps.read-lambda-names.outputs.lambda_names }})
+          for item in $items; do
+              echo "item: $item"
+          done
+
+      - name: Download all artifacts to inspect the code quality
+        uses: actions/download-artifact@v4
+        with:
+          path: ./lambdas/cov_artifacts
+          pattern: "lambda_*_cov_artifact"
+
+      - name: Display all downloaded artifacts structure to inspect the code quality
+        run: ls -R ./lambdas/cov_artifacts
+
+      - name: Copy coverage.xml file from all downloaded artifacts to lambda structure
+        run: |
+          items=$(echo  ${{ steps.read-lambda-names.outputs.lambda_names }})
+          for item in $items; do
+            cp ./lambdas/cov_artifacts/${item}_cov_artifact/coverage.xml \
+              ./lambdas/${item}/coverage.xml
+          done
+
+      - name: Display all lambda structure to inspect the code quality
+        run: ls -R ./lambdas
+
+      # extraProperties: |
+      # sonar.python.coverage.reportPaths = ./..lambdas/code_quality_inspection_artifacts/**/coverage.xml
+      # sonar.sources = ./..lambdas/code_quality_inspection_artifacts/
+      # sonar.tests = ./..lambdas/code_quality_inspection_artifacts/**tests/
+      # sonar.test.inclusions = **/test_*.py
+      # sonar.exclusions = ./..lambdas/code_quality_inspection_artifacts/**/src/index.py,./..lambdas/code_quality_inspection_artifacts/**/tests/**/*,./..lambdas/code_quality_inspection_artifacts/**/__pycache__/**/*

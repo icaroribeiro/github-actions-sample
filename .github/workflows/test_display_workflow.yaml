@@ -1,0 +1,102 @@
+name: "test_display_workflow"
+
+on:
+  workflow_call:
+
+jobs:
+  test-display:
+    name: "Test Display"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read lambda configuration
+        id: read-lambda-names
+        run: |
+          LAMBDA_CONFIG_1="$(jq -r '.[]' lambda_config.json)"
+          echo "lambda_config_1=$(echo $LAMBDA_CONFIG_1)" >> $GITHUB_OUTPUT
+          LAMBDA_CONFIG_2="$(jq -c '.[]' lambda_config.json)"
+          echo "lambda_config_2=$(echo $LAMBDA_CONFIG_2)" >> $GITHUB_OUTPUT
+          LAMBDA_CONFIG_3="$(jq -c -r '.[]' lambda_config.json)"
+          echo "lambda_config_3=$(echo $LAMBDA_CONFIG_3)" >> $GITHUB_OUTPUT
+          LAMBDA_CONFIG_4="$(jq -c . lambda_config.json)"
+          echo "lambda_config_4=$(echo $LAMBDA_CONFIG_4)" >> $GITHUB_OUTPUT
+
+      # - name: Display lambda configuration 1.1
+      #   run: |
+      #     items=$(echo  ${{ toJson(steps.read-lambda-names.outputs.lambda_config_1) }})
+      #     for item in $items; do
+      #         echo "item: $item"
+      #     done
+      # - name: Display lambda configuration 1.2
+      #   run: |
+      #     items=$(echo  ${{ toJson(steps.read-lambda-names.outputs.lambda_config_1) }})
+      #     for item in ${items[@]}; do
+      #         echo "item: $item"
+      #     done
+
+      # - name: Display lambda configuration 1.3
+      #   run: |
+      #     items=$(echo  ${{ toJson(steps.read-lambda-names.outputs.lambda_config_1) }})
+      #     for item in "${items[@]}"; do
+      #         echo "item: $item"
+      #     done
+      #     echo "----------------------------"
+
+      - name: Display lambda configuration 2.1
+        run: |
+          items=$(echo  ${{ toJson(steps.read-lambda-names.outputs.lambda_config_2) }})
+          for item in $items; do
+              echo "item: $item"
+              pythonVersion=$(echo $item | jq -r '.pythonVersion')
+              echo "pythonVersion: $pythonVersion"
+              lambdaName=$(echo $item | jq -r '.lambdaName')
+              echo "lambdaName: $lambdaName"
+          done
+
+      # - name: Display lambda configuration 2.2
+      #   run: |
+      #     items=$(echo  ${{ toJson(steps.read-lambda-names.outputs.lambda_config_2) }})
+      #     for item in ${items[@]}; do
+      #         echo "item: $item"
+      #     done
+
+      # - name: Display lambda configuration 2.3
+      #   run: |
+      #     items=$(echo  ${{ toJson(steps.read-lambda-names.outputs.lambda_config_2) }})
+      #     for item in "${items[@]}"; do
+      #         echo "item: $item"
+      #     done
+      #     echo "----------------------------"
+
+      # - name: Display lambda configuration 3.1
+      #   run: |
+      #     items=$(echo  ${{ toJson(steps.read-lambda-names.outputs.lambda_config_3) }})
+      #     for item in $items; do
+      #         echo "item: $item"
+      #     done
+
+      # - name: Display lambda configuration 3.2
+      #   run: |
+      #     items=$(echo  ${{ toJson(steps.read-lambda-names.outputs.lambda_config_3) }})
+      #     for item in ${items[@]}; do
+      #         echo "item: $item"
+      #     done
+
+      # - name: Display lambda configuration 3.3
+      #   run: |
+      #     items=$(echo  ${{ toJson(steps.read-lambda-names.outputs.lambda_config_3) }})
+      #     for item in "${items[@]}"; do
+      #         echo "item: $item"
+      #     done
+
+      - name: Display lambda configuration 4
+        run: |
+          items=$(echo  ${{ steps.read-lambda-names.outputs.lambda_config_4 }})
+          echo "1: $items"
+          items=$(echo  ${{ fromJson(steps.read-lambda-names.outputs.lambda_config_4) }})
+          echo "2: $items"
+          items=$(echo  ${{ toJson(steps.read-lambda-names.outputs.lambda_config_4) }})
+          echo "3: $items"
