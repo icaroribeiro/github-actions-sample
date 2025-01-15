@@ -1,7 +1,6 @@
 name: "run_python_workflow"
 
-on:
-  workflow_call:
+on: workflow_dispatch
 
 jobs:
   setup:
@@ -69,6 +68,7 @@ jobs:
         with:
           name: ${{ matrix.lambda_config_obj.lambdaName }}_cov_artifact
           path: |
+            ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}/.coverage
             ./lambdas/${{ matrix.lambda_config_obj.lambdaName }}/coverage.xml
 
       - name: Build code

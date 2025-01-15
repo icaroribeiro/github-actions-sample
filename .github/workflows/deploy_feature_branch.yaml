@@ -3,36 +3,38 @@ name: "deploy_feature_branch"
 on:
   push:
     branches:
-      - "np**"
+      - "features/*/*"
   pull_request:
     branches:
-      - "np**"
+      - "features/*/*"
 
 jobs:
-  # test-display:
-  #   name: "Test Display"
-  #   uses: ./.github/workflows/test_display_workflow.yaml
-
-  build-lambdas:
-    name: "Build Lambdas"
-    uses: ./.github/workflows/run_python_workflow.yaml
-
-  analyze-code:
-    name: "Analyze Code"
-    uses: ./.github/workflows/inspect_code_quality_workflow.yaml
-    needs: [build-lambdas]
-
-  deploy-infra:
-    name: "Deploy Infra"
-    permissions:
-      issues: write
-    uses: ./.github/workflows/apply_infra_workflow.yaml
-    needs: [build-lambdas, analyze-code]
+  test-display:
+    name: "Test Display"
+    uses: ./.github/workflows/test_display_workflow.yaml
     with:
-      terraform_version: "1.8.3"
-      environment: "dev"
       branch: ${{ github.head_ref || github.ref_name }}
-      aws_region: "sa-east-1"
-      aws_assume_role_arn: "aws_assume_role_arn"
-      aws_state_file_s3_bucket: "aws_state_file_s3_bucket"
-      aws_state_lock_dynamodb_table: "aws_state_lock_dynamodb_table"
+
+  # build-lambdas:
+  #   name: "Build Lambdas"
+  #   uses: ./.github/workflows/run_python_workflow.yaml
+
+  # analyze-code:
+  #   name: "Analyze Code"
+  #   uses: ./.github/workflows/inspect_code_quality_workflow.yaml
+  #   needs: [build-lambdas]
+
+  # deploy-infra:
+  #   name: "Deploy Infra"
+  #   permissions:
+  #     issues: write
+  #   uses: ./.github/workflows/apply_infra_workflow.yaml
+  #   needs: [build-lambdas, analyze-code]
+  #   with:
+  #     terraform_version: "1.8.3"
+  #     environment: "dev"
+  #     branch: ${{ github.head_ref || github.ref_name }}
+  #     aws_region: "sa-east-1"
+  #     aws_assume_role_arn: "aws_assume_role_arn"
+  #     aws_state_file_s3_bucket: "aws_state_file_s3_bucket"
+  #     aws_state_lock_dynamodb_table: "aws_state_lock_dynamodb_table"

@@ -34,10 +34,12 @@ jobs:
       - name: Display all downloaded artifacts structure to inspect the code quality
         run: ls -R ./lambdas/cov_artifacts
 
-      - name: Copy coverage.xml file from all downloaded artifacts to lambda structure
+      - name: Copy .coverage and coverage.xml file from all downloaded artifacts
         run: |
           items=$(echo  ${{ steps.read-lambda-names.outputs.lambda_names }})
           for item in $items; do
+            cp ./lambdas/cov_artifacts/${item}_cov_artifact/.coverage \
+              ./lambdas/${item}/.coverage
             cp ./lambdas/cov_artifacts/${item}_cov_artifact/coverage.xml \
               ./lambdas/${item}/coverage.xml
           done

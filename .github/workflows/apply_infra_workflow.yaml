@@ -46,15 +46,15 @@ jobs:
       - name: Display all downloaded artifacts structure to distribute the code
         run: ls -R ./../lambdas/release_artifacts
 
-      # - name: Display variables
-      #   run: |
-      #     echo "terraform_version: ${{ inputs.terraform_version }}"
-      #     echo "environment: ${{ inputs.environment }}"
-      #     echo "branch: ${{ inputs.branch }}"
-      #     echo "aws_region: ${{ inputs.aws_region }}"
-      #     echo "aws_assume_role_arn: ${{ inputs.aws_assume_role_arn }}"
-      #     echo "aws_state_file_s3_bucket: ${{ inputs.aws_state_file_s3_bucket }}"
-      #     echo "aws_state_lock_dynamodb_table: ${{ inputs.aws_state_lock_dynamodb_table }}"
+      - name: Display variables
+        run: |
+          echo "terraform_version: ${{ inputs.terraform_version }}"
+          echo "environment: ${{ inputs.environment }}"
+          echo "branch: ${{ inputs.branch }}"
+          echo "aws_region: ${{ inputs.aws_region }}"
+          echo "aws_assume_role_arn: ${{ inputs.aws_assume_role_arn }}"
+          echo "aws_state_file_s3_bucket: ${{ inputs.aws_state_file_s3_bucket }}"
+          echo "aws_state_lock_dynamodb_table: ${{ inputs.aws_state_lock_dynamodb_table }}"
 
       - name: Deploy resources
         run: |
