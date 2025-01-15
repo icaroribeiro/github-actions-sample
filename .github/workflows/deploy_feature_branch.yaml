@@ -3,15 +3,17 @@ name: "deploy_feature_branch"
 on:
   push:
     branches:
-      - "np**"
+      - "*/tasks/*"
   pull_request:
     branches:
-      - "np**"
+      - "*/tasks/*"
 
 jobs:
   # test-display:
   #   name: "Test Display"
   #   uses: ./.github/workflows/test_display_workflow.yaml
+  #   with:
+  #     branch: ${{ github.head_ref || github.ref_name }}
 
   build-lambdas:
     name: "Build Lambdas"

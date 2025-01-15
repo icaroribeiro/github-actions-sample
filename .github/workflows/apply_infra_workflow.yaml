@@ -37,6 +37,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Split branch name
+        env:
+          BRANCH: ${{ inputs.branch }}
+        id: split-branch-name
+        run: |
+          BRANCH_NAME=${BRANCH%%/*}
+          echo "branch_name=$(echo $BRANCH_NAME)" >> $GITHUB_OUTPUT
+
       - name: Download all artifacts to distribute the code
         uses: actions/download-artifact@v4
         with:
@@ -46,19 +54,19 @@ jobs:
       - name: Display all downloaded artifacts structure to distribute the code
         run: ls -R ./../lambdas/release_artifacts
 
-      # - name: Display variables
-      #   run: |
-      #     echo "terraform_version: ${{ inputs.terraform_version }}"
-      #     echo "environment: ${{ inputs.environment }}"
-      #     echo "branch: ${{ inputs.branch }}"
-      #     echo "aws_region: ${{ inputs.aws_region }}"
-      #     echo "aws_assume_role_arn: ${{ inputs.aws_assume_role_arn }}"
-      #     echo "aws_state_file_s3_bucket: ${{ inputs.aws_state_file_s3_bucket }}"
-      #     echo "aws_state_lock_dynamodb_table: ${{ inputs.aws_state_lock_dynamodb_table }}"
+      - name: Display variables
+        run: |
+          echo "terraform_version: ${{ inputs.terraform_version }}"
+          echo "environment: ${{ inputs.environment }}"
+          echo "branch: ${{ steps.split-branch-name.outputs.branch_name }}"
+          echo "aws_region: ${{ inputs.aws_region }}"
+          echo "aws_assume_role_arn: ${{ inputs.aws_assume_role_arn }}"
+          echo "aws_state_file_s3_bucket: ${{ inputs.aws_state_file_s3_bucket }}"
+          echo "aws_state_lock_dynamodb_table: ${{ inputs.aws_state_lock_dynamodb_table }}"
 
       - name: Deploy resources
         run: |
-          echo "Deploy resources for branch ${{ inputs.branch }}"
+          echo "Deploy resources for branch ${{ steps.split-branch-name.outputs.branch_name }}"
 
       # - name: Configure AWS credentials
       #   uses: aws-actions/configure-aws-credentials@v4
@@ -94,7 +102,7 @@ jobs:
     #   run: |
     #     terraform workspace select ${{ inputs.environment }} -or-create &&
     #     terraform plan \
-    #       -var="branch=${{ inputs.branch }}" \
+    #       -var="branch=${{ steps.split-branch-name.outputs.branch_name }}" \
     #       -var-file="./envs/${{ inputs.environment }}.tfvars" \
     #       -out="${{ inputs.environment }}.plan"
 
